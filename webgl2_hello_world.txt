@@ -1,0 +1,127 @@
+WebGL2 JavaScript Code - Comprehensive Technical Explanation
+==================================================================
+
+ENGLISH VERSION
+---------------
+
+1. CONTEXT INITIALIZATION:
+   - document.querySelector('Canvas').getContext('webgl2')
+     * Selects the first <canvas> element in DOM
+     * Requests WebGL2 rendering context (as opposed to regular WebGL 1.0)
+     * Returns WebGL2RenderingContext object stored in 'gl' variable
+     * If WebGL2 unavailable, returns null/throws error
+
+2. SHADER CREATION PROCESS:
+
+   A. VERTEX SHADER (vertexShaderSource):
+      - #version 300 es: Declares GLSL ES 3.00 (WebGL2's shading language)
+      - void main(): Entry point function
+      - gl_Position = vec4(0.0, 0.0, 0.0, 1.0):
+        * Sets clip space coordinates (x,y,z,w)
+        * (0,0) = center, (-1,-1) = bottom-left, (1,1) = top-right
+        * w=1.0 for perspective division
+      - gl_PointSize = 100.0: Diameter in pixels when drawing points
+
+   B. FRAGMENT SHADER (fragmentShaderSource):
+      - precision mediump float: Sets default float precision
+      - out vec4 fragColor: Modern GLSL output declaration
+      - vec4(0.0, 1.0, 0.0, 1.0): RGBA color (pure green)
+
+3. SHADER COMPILATION PIPELINE:
+
+   A. Vertex Shader:
+      - gl.createShader(gl.VERTEX_SHADER): Creates shader object
+      - gl.shaderSource(): Loads GLSL source code
+      - gl.compileShader(): Compiles to GPU-executable format
+        * Check gl.getShaderParameter(shader, gl.COMPILE_STATUS)
+        * Retrieve errors with gl.getShaderInfoLog()
+
+   B. Fragment Shader:
+      - Same process as vertex shader but with gl.FRAGMENT_SHADER
+
+4. PROGRAM LINKING:
+   - gl.createProgram(): Creates empty program object
+   - gl.attachShader(): Attaches both compiled shaders
+   - gl.linkProgram(): Links shaders into executable program
+     * Check gl.getProgramParameter(program, gl.LINK_STATUS)
+     * Retrieve errors with gl.getProgramInfoLog()
+   - gl.useProgram(): Installs program on GPU
+
+5. RENDERING:
+   - gl.drawArrays(gl.POINTS, 0, 1):
+     * gl.POINTS: Primitive type
+     * 0: Starting index in vertex arrays
+     * 1: Number of vertices to render
+   - Under the hood:
+     * Vertex shader executes once (1 vertex)
+     * Rasterization generates fragments for 100px circle
+     * Fragment shader colors all fragments green
+     * Final output drawn to framebuffer (canvas)
+
+COORDINATE SYSTEMS:
+- Normalized Device Coordinates (NDC): -1 to 1 in X/Y
+- Viewport: Maps NDC to canvas pixels (320x320 in this case)
+- gl_Position: Output in clip space (before perspective divide)
+
+
+中文版本（详细技术说明）
+----------------------
+
+1. 上下文初始化:
+   - document.querySelector('Canvas').getContext('webgl2')
+     * 选择DOM中第一个<canvas>元素
+     * 请求WebGL2渲染上下文（区别于WebGL 1.0）
+     * 返回存储在'gl'变量中的WebGL2RenderingContext对象
+     * 如果WebGL2不可用则返回null/抛出错误
+
+2. 着色器创建过程:
+
+   A. 顶点着色器(vertexShaderSource):
+      - #version 300 es: 声明GLSL ES 3.00版本
+      - void main(): 入口函数
+      - gl_Position = vec4(0.0, 0.0, 0.0, 1.0):
+        * 设置裁剪空间坐标(x,y,z,w)
+        * (0,0)=中心, (-1,-1)=左下, (1,1)=右上
+        * w=1.0用于透视除法
+      - gl_PointSize = 100.0: 点渲染时的直径（像素）
+
+   B. 片段着色器(fragmentShaderSource):
+      - precision mediump float: 设置默认浮点精度
+      - out vec4 fragColor: 现代GLSL输出声明
+      - vec4(0.0, 1.0, 0.0, 1.0): RGBA颜色（纯绿）
+
+3. 着色器编译管线:
+
+   A. 顶点着色器:
+      - gl.createShader(gl.VERTEX_SHADER): 创建着色器对象
+      - gl.shaderSource(): 加载GLSL源代码
+      - gl.compileShader(): 编译为GPU可执行格式
+        * 通过gl.getShaderParameter(shader, gl.COMPILE_STATUS)检查状态
+        * 通过gl.getShaderInfoLog()获取错误信息
+
+   B. 片段着色器:
+      - 流程与顶点着色器相同，但使用gl.FRAGMENT_SHADER参数
+
+4. 程序链接:
+   - gl.createProgram(): 创建空程序对象
+   - gl.attachShader(): 附加两个已编译的着色器
+   - gl.linkProgram(): 将着色器链接为可执行程序
+     * 通过gl.getProgramParameter(program, gl.LINK_STATUS)检查状态
+     * 通过gl.getProgramInfoLog()获取错误信息
+   - gl.useProgram(): 在GPU上安装该程序
+
+5. 渲染过程:
+   - gl.drawArrays(gl.POINTS, 0, 1):
+     * gl.POINTS: 图元类型
+     * 0: 顶点数组起始索引
+     * 1: 需要渲染的顶点数量
+   - 底层过程:
+     * 顶点着色器执行一次（1个顶点）
+     * 光栅化生成100px圆的所有片段
+     * 片段着色器将所有片段着色为绿色
+     * 最终输出绘制到帧缓冲区（canvas）
+
+坐标系系统:
+- 标准化设备坐标(NDC): X/Y方向-1到1
+- 视口: 将NDC映射到canvas像素（本例中320x320）
+- gl_Position: 输出在裁剪空间（透视除法之前）
