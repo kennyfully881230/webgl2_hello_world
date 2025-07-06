@@ -1,4 +1,5 @@
 # WebGL2 - Hello World (网络图形库2 - 你好，世界)
+## https://kennyfully881230.github.io/webgl2_hello_world/
 
 This repository contains a simple "Hello World" example demonstrating basic WebGL2 rendering by drawing a single green point on a canvas.
 
