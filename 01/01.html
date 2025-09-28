@@ -1,4 +1,5 @@
 <!-- Created by: Kenny Fully. May GOD bless you. -->
+<!-- 作者：肯尼·福利。愿上帝保佑你。 -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -80,6 +81,7 @@
   <h2 class='footer'>By:Kenny Fully (作者：肯尼)</h2>
 
   <!-- color sliders -->
+  <!-- 颜色滑块 -->
   <div class='color-sliders'>
     <input type="range" min="0" max="1" value="0.5" step="0.01" class="slider_r" id="myRange" />
     <input type="range" min="0" max="1" value="0.5" step="0.01" class="slider_g" id="myRange" />
@@ -89,6 +91,8 @@
 
   <script>
     'use strict'
+    // Get slider elements for color control
+    // 获取颜色控制的滑块元素
     const sliderR = document.querySelector('.slider_r')
     const sliderG = document.querySelector('.slider_g')
     const sliderB = document.querySelector('.slider_b')
@@ -110,14 +114,14 @@
   `
 
     // Fragment shader source code written in GLSL
-    // This shader sets the color of the point (green in this case)
-    // 片段着色器源代码（GLSL编写），设置点的颜色（这里是绿色）
+    // This shader sets the color of the point using a uniform variable
+    // 片段着色器源代码（GLSL编写），使用uniform变量设置点的颜色
     const fragmentShaderSource = `#version 300 es
     precision mediump float; // Set floating point precision (设置浮点精度)
-    uniform vec4 u_color; // uniform variable for color
+    uniform vec4 u_color; // uniform variable for color (颜色uniform变量)
     out vec4 fragColor; // Output color (输出颜色)
     void main() {
-      fragColor = u_color; // Use the uniform color
+      fragColor = u_color; // Use the uniform color (使用uniform颜色)
     }
   `
 
@@ -147,24 +151,38 @@
     // 告诉WebGL使用这个程序
     gl.useProgram(program)
 
-    /** Get the uniform location */
+    // Get the uniform location for color
+    // 获取颜色uniform变量的位置
     const colorUniformLocation = gl.getUniformLocation(program, 'u_color')
 
+    // Enable blending for transparency support
+    // 启用混合以支持透明度
     gl.enable(gl.BLEND)
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-    // Function to change color
+    // Function to change color and redraw the point
+    // 更改颜色并重新绘制点的函数
     const setColor = (r, g, b, a) => {
+      // Clear the canvas with transparent black
+      // 用透明黑色清除画布
       gl.clearColor(0.0, 0.0, 0.0, 0.0)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      gl.uniform4f(colorUniformLocation, r, g, b, a) // Set uniform values
+      
+      // Set uniform color values
+      // 设置uniform颜色值
+      gl.uniform4f(colorUniformLocation, r, g, b, a)
+      
       // Draw a point at position (0,0) with the specified color and size
       // 在位置(0,0)绘制一个具有指定颜色和大小的点
-      gl.drawArrays(gl.POINTS, 0, 1) // Redraw the new color
+      gl.drawArrays(gl.POINTS, 0, 1)
     }
 
+    // Initialize with default slider values
+    // 使用默认滑块值初始化
     setColor(sliderR.value, sliderG.value, sliderB.value, sliderA.value)
 
+    // Add event listeners to sliders for real-time color updates
+    // 为滑块添加事件监听器以实现实时颜色更新
     sliderR.addEventListener('change', e => {
       setColor(sliderR.value, sliderG.value, sliderB.value, sliderA.value)
     })
