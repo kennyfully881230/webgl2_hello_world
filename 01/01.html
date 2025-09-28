@@ -1,0 +1,186 @@
+<!-- Created by: Kenny Fully. May GOD bless you. -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" />
+  <meta name="viewport"
+    content="viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      align-items: center;
+      background-color: #0F0F0F;
+      display: flex;
+      height: 100dvh;
+      justify-content: center;
+    }
+
+    canvas {
+      background-color: #000000;
+      border: 0.1rem solid #80FF80;
+    }
+
+    .color-sliders {
+      align-items: center;
+      background-color: #808080;
+      bottom: 48px;
+      display: flex;
+      height: 48px;
+      justify-content: space-around;
+      position: absolute;
+      width: 99%;
+      z-index: 99999;
+    }
+
+    .slider_r {
+      accent-color: #804040;
+    }
+
+    .slider_g {
+      accent-color: #408040;
+    }
+
+    .slider_b {
+      accent-color: #404080;
+    }
+
+    .slider_a {
+      accent-color: #101010;
+    }
+
+    .footer {
+      bottom: 0.25rem;
+      color: #80FF80;
+      position: fixed;
+      right: 0.25rem;
+    }
+
+    .title {
+      top: 0.25rem;
+      color: #80FF80;
+      left: 0.25rem;
+      position: fixed;
+    }
+  </style>
+  <link class="app-icon" rel="icon" href="#" />
+  <title>WebGL2 (Web Graphics Library 2 / 网络图形库2) - Hello World (你好，世界)</title>
+</head>
+
+<body>
+  <h1 class='title'>WebGL2 - Hello World (你好，世界)</h1>
+  <canvas width=720 height=720></canvas>
+  <h2 class='footer'>By:Kenny Fully (作者：肯尼)</h2>
+
+  <!-- color sliders -->
+  <div class='color-sliders'>
+    <input type="range" min="0" max="1" value="0.5" step="0.01" class="slider_r" id="myRange" />
+    <input type="range" min="0" max="1" value="0.5" step="0.01" class="slider_g" id="myRange" />
+    <input type="range" min="0" max="1" value="0.5" step="0.01" class="slider_b" id="myRange" />
+    <input type="range" min="0" max="1" value="1.0" step="0.01" class="slider_a" id="myRange" />
+  </div>
+
+  <script>
+    'use strict'
+    const sliderR = document.querySelector('.slider_r')
+    const sliderG = document.querySelector('.slider_g')
+    const sliderB = document.querySelector('.slider_b')
+    const sliderA = document.querySelector('.slider_a')
+
+    // Get the WebGL2 rendering context from the canvas element
+    // 获取 canvas 元素的 WebGL2 渲染上下文
+    const gl = document.querySelector('Canvas').getContext('webgl2')
+
+    // Vertex shader source code written in GLSL (OpenGL Shading Language)
+    // This shader sets the position of the point and its size
+    // 顶点着色器源代码（GLSL编写），设置点的位置和大小
+    const vertexShaderSource = `#version 300 es
+    precision mediump float; // Set floating point precision (设置浮点精度)
+    void main() {
+      gl_Position = vec4(0.0, 0.0, 0.0, 1.0); // Center position (中心位置)
+      gl_PointSize = 100.0; // Point size (点的大小)
+    }
+  `
+
+    // Fragment shader source code written in GLSL
+    // This shader sets the color of the point (green in this case)
+    // 片段着色器源代码（GLSL编写），设置点的颜色（这里是绿色）
+    const fragmentShaderSource = `#version 300 es
+    precision mediump float; // Set floating point precision (设置浮点精度)
+    uniform vec4 u_color; // uniform variable for color
+    out vec4 fragColor; // Output color (输出颜色)
+    void main() {
+      fragColor = u_color; // Use the uniform color
+    }
+  `
+
+    // Create a new WebGL program
+    // 创建一个新的WebGL程序
+    const program = gl.createProgram()
+
+    // Create and compile the vertex shader
+    // 创建并编译顶点着色器
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER)
+    gl.shaderSource(vertexShader, vertexShaderSource) // Attach source code (附加源代码)
+    gl.compileShader(vertexShader) // Compile the shader (编译着色器)
+    gl.attachShader(program, vertexShader) // Attach to program (附加到程序)
+
+    // Create and compile the fragment shader
+    // 创建并编译片段着色器
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
+    gl.shaderSource(fragmentShader, fragmentShaderSource) // Attach source code (附加源代码)
+    gl.compileShader(fragmentShader) // Compile the shader (编译着色器)
+    gl.attachShader(program, fragmentShader) // Attach to program (附加到程序)
+
+    // Link the program (combines both shaders)
+    // 链接程序（组合两个着色器）
+    gl.linkProgram(program)
+
+    // Tell WebGL to use this program
+    // 告诉WebGL使用这个程序
+    gl.useProgram(program)
+
+    /** Get the uniform location */
+    const colorUniformLocation = gl.getUniformLocation(program, 'u_color')
+
+    gl.enable(gl.BLEND)
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+    // Function to change color
+    const setColor = (r, g, b, a) => {
+      gl.clearColor(0.0, 0.0, 0.0, 0.0)
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+      gl.uniform4f(colorUniformLocation, r, g, b, a) // Set uniform values
+      // Draw a point at position (0,0) with the specified color and size
+      // 在位置(0,0)绘制一个具有指定颜色和大小的点
+      gl.drawArrays(gl.POINTS, 0, 1) // Redraw the new color
+    }
+
+    setColor(sliderR.value, sliderG.value, sliderB.value, sliderA.value)
+
+    sliderR.addEventListener('change', e => {
+      setColor(sliderR.value, sliderG.value, sliderB.value, sliderA.value)
+    })
+
+    sliderG.addEventListener('change', e => {
+      setColor(sliderR.value, sliderG.value, sliderB.value, sliderA.value)
+    })
+
+    sliderB.addEventListener('change', e => {
+      setColor(sliderR.value, sliderG.value, sliderB.value, sliderA.value)
+    })
+
+    sliderA.addEventListener('change', e => {
+      setColor(sliderR.value, sliderG.value, sliderB.value, sliderA.value)
+    })
+  </script>
+</body>
+
+</html>
