@@ -1,0 +1,162 @@
+<!-- Created by: Kenny Fully. May GOD bless you. -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" />
+  <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0,
+          maximum-scale=1.0, user-scalable=no" />
+  <link class="app-icon" rel="icon"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAfpJREFUWIXtljFIG2EUx3+X9CQJGtIhkKa49AhIEDsUqoJwQ0F0EQqSxcGt1NEpq2uIi3Qr6pZNOHBQ0MFFRZw0aIZK3DxiE1FC1IMjXocWSU2+69drbBD8T3e8/3vvd3fv+75THMdx6KB8nWz+DADwwmviztISm/PzAMT6+vhsGO0HqJZK7OdyACg+Hx9mZ1v67up1bqtVYZ2uYBC/qv49QK1SYXtxEQCf3y8E+H5yQmZwUFgntbBAcnS0ZezpzkCjwrEY+syMMP4qmXxcgFAkwrtUylOu8nAn/Do5eX9tWxblYvGXUyHe8CS1SoXq+TkAaiBAVNOkGn5aWfntvukNmMfHrTMdRxizLUuc9wc1AbwZHvZUyKuaPsH/lusQfhkb4+by8t86KArpvT1vAFat5rrDyQK4SXoZ9o+PE3NZz40qFQocra9LeaUBoomE9IDWbRskAVyHMDsywvXFhRyhsIPCXKEgDD+ds+BjJsPbiQkp7+HqKkY63V6A/VyOb1tbUt4r05QtKw9wls9zls9LF247wOuBASLxuJT3yjSlYaUB3k9NSc/AgWG0H8BNu8vLHK2tAdAVClE+Pb2PBXt6Hh8goetsZLPCmGeAQHc3d7b90yj4qwWIahpRTaNcLBIMh/GrKi97e0noOkPT064AHT+OO74TPgP8AF8Sn3rnZKUPAAAAAElFTkSuQmCC" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      touch-action: none;
+      user-select: none;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      align-items: center;
+      background-color: #202020;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      justify-content: center;
+    }
+
+    canvas {
+      background-color: #000000;
+    }
+
+    @media (orientation:landscape) {
+      canvas {
+        height: 100%;
+      }
+    }
+
+    @media (orientation:portrait) {
+      canvas {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <title>Hello World | 你好世界</title>
+</head>
+
+<body>
+  <canvas width="720" height="720"></canvas>
+
+  <script>
+    // Strict mode for safer JavaScript execution
+    'use strict'
+
+    // Get the canvas element from the HTML document
+    const canvas = document.querySelector('canvas')
+
+    // Get WebGL2 rendering context - this is our gateway to GPU acceleration
+    // WebGL2 is based on OpenGL ES 3.0
+    const gl = canvas.getContext('webgl2')
+
+    // VERTEX SHADER - runs once for each vertex (corner point) of our shape
+    // Version declaration: #version 300 es = OpenGL ES 3.0 (WebGL2 standard)
+    const vertexShaderSource = `#version 300 es
+    // 'in' keyword declares an input variable from JavaScript
+    // vec2 = 2-component vector (x, y coordinates)
+    // vertexPosition will receive vertex data from our buffer
+    in vec2 vertexPosition;
+
+    void main() {
+      // gl_Position is a built-in variable that stores the final vertex position
+      // We convert our 2D position to 4D by adding z=0.0 and w=1.0
+      // In WebGL, coordinates range from -1.0 to 1.0 (normalized device coordinates)
+      gl_Position = vec4(vertexPosition, 0.0, 1.0);
+    }
+  `
+
+    // FRAGMENT SHADER (also called Pixel Shader) - runs once for each pixel
+    const fragmentShaderSource = `#version 300 es
+    // Set precision for floating point calculations
+    // mediump = medium precision (balanced between speed and quality)
+    precision mediump float;
+
+    // 'out' declares an output variable - the final color of each pixel
+    // vec4 = 4-component vector (red, green, blue, alpha/transparency)
+    out vec4 fragColor;
+
+    void main() {
+      // Set every pixel to solid green: RGB(0.0, 1.0, 0.0), Alpha = 1.0 (fully opaque)
+      // Colors in WebGL range from 0.0 to 1.0 (not 0-255)
+      fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+    }
+  `
+
+    // Create a shader program - this combines both vertex and fragment shaders
+    const program = gl.createProgram()
+
+    // VERTEX SHADER SETUP
+    // Create vertex shader object
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER)
+    // Attach the shader source code
+    gl.shaderSource(vertexShader, vertexShaderSource)
+    // Compile the shader to GPU machine code
+    gl.compileShader(vertexShader)
+    // Attach compiled shader to our program
+    gl.attachShader(program, vertexShader)
+
+    // FRAGMENT SHADER SETUP
+    // Create vertex shader object
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
+    // Attach the shader source code
+    gl.shaderSource(fragmentShader, fragmentShaderSource)
+    // Compile the shader to GPU machine code
+    gl.compileShader(fragmentShader)
+    // Attach compiled shader to our program
+    gl.attachShader(program, fragmentShader)
+
+    // LINK AND ACTIVATE THE PROGRAM
+    // Link both shaders together into a complete pipeline
+    gl.linkProgram(program)
+    // Tell WebGL to use this program for rendering
+    gl.useProgram(program)
+
+    // VERTEX DATA SETUP - Defining our triangle
+    // Create a buffer (memory area on GPU) to store vertex positions
+    const triangleVertexPositionBuffer = gl.createBuffer()
+    // Bind the buffer to ARRAY_BUFFER target (think of it as "activating" this buffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer)
+    // Upload vertex data to GPU memory
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -0.5, -0.5, // bottom left vertex (x, y)
+      0.5, -0.5,  // bottom right vertex (x, y)
+      0.0, 0.5,   // top vertex (x, y)
+    ]), gl.STATIC_DRAW) // STATIC_DRAW = data won't change frequently
+
+    // CONNECT BUFFER DATA TO SHADER ATTRIBUTE
+    // Get the location of 'vertexPosition' attribute in our shader
+    const triangleVertexPosition = gl.getAttribLocation(program, 'vertexPosition')
+    // Enable this attribute so WebGL knows to use it
+    gl.enableVertexAttribArray(triangleVertexPosition)
+    // Tell WebGL how to interpret the buffer data:
+    // - attribute location: triangleVertexPosition
+    // - size: 2 components per vertex (x, y)
+    // - type: gl.FLOAT (32-bit floating point numbers)
+    // - normalize: false (don't convert from 0-255 to 0.0-1.0)
+    // - stride: 0 (tightly packed data, no gaps between vertices)
+    // - offset: 0 (start from beginning of buffer)
+    gl.vertexAttribPointer(triangleVertexPosition, 2, gl.FLOAT, false, 0, 0)
+
+    // FINAL RENDERING COMMAND
+    // Draw the triangle using the current program and buffer data:
+    // - gl.TRIANGLES: draw as triangles (3 vertices = 1 triangle)
+    // - 0: start from first vertex
+    // - 3: draw 3 vertices total (one complete triangle)
+    gl.drawArrays(gl.TRIANGLES, 0, 3)
+  </script>
+</body>
+
+</html>
